@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "fastapi-db-poc"
+version = "0.0.1"
+description = "articles-tags"
+authors = ["Seraphnet <dev@seraphnet.ai>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+fastapi = "^0.73.0"
+prometheus-fastapi-instrumentator = "^5.7.1"
+uvicorn = "^0.17.4"
+python-json-logger = "^2.0.1"
+
+[tool.poetry.dev-dependencies]
+ipdb = "^0.13.9"
+flake8 = "^4.0.1"
+pytest = "^7.0.0"
+autopep8 = "^1.6.0"
+black = "^22.1.0"
+pytest-dependency = "^0.5.1"
+pytest-cov = "^3.0.0"
+jupyter = "^1.0.0"
+jupyter-dash = "^0.4.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  articles_tags:
+    container_name: articles-tags
+    image: harbor.grtech.pl/aida360/articles-tags/localdev:master
+    environment:
+      - VERSION=development
+    pull_policy: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+      - ./setup.cfg:/root/.config/flake8
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 2s
+      retries: 3
+      start_period: 40s
