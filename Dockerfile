@@ -1,4 +1,4 @@
-FROM python:3.9.9-rev1 as base
+FROM python:3.10.14-slim as base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
@@ -17,6 +17,7 @@ RUN apt-get update -y \
         tree \
         ssh \
         git \
+        netcat-traditional \
     && rm -r /var/lib/apt/lists/*
 
 ENV POETRY_HOME=/etc/poetry \
@@ -27,6 +28,9 @@ ENV POETRY_HOME=/etc/poetry \
 
 RUN curl -sSL https://install.python-poetry.org | python3 - --version 1.3.2
 
+# Copy wait-for script
+COPY wait-for /usr/local/bin/wait-for
+RUN chmod +x /usr/local/bin/wait-for
 
 
 FROM builder as development
@@ -42,9 +46,9 @@ CMD uvicorn --reload --host=0.0.0.0 --port=8000 app.api:app
 
 FROM builder as local-development
 
-RUN mkdir -m 700 /root/.ssh \
-    && touch -m 600 /root/.ssh/known_hosts \
-    && ssh-keyscan git.grtech.pl > /root/.ssh/known_hosts
+#RUN mkdir -m 700 /root/.ssh \
+#    && touch -m 600 /root/.ssh/known_hosts \
+#    && ssh-keyscan git.grtech.pl > /root/.ssh/known_hosts
 
 COPY ./pyproject.toml ./poetry.lock ./
 RUN --mount=type=ssh $POETRY_HOME/bin/poetry install --no-root

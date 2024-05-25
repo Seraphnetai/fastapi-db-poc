@@ -2,6 +2,18 @@
 
 from typing import Optional
 from pydantic import BaseModel, Field
+from sqlalchemy import Column, Integer
+
+from .config import Base
+
+
+class ExampleModel(Base):
+    """
+    Example model
+    """
+    __tablename__ = "example_model"
+
+    id = Column(Integer, primary_key=True, index=True)
 
 
 class EndpointInputModel(BaseModel):

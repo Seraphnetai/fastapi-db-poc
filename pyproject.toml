@@ -1,15 +1,22 @@
 [tool.poetry]
-name = "fastapi-db-poc"
+name = "clearpill-db-poc"
 version = "0.0.1"
-description = "articles-tags"
+description = "Clearpill DB POC"
 authors = ["Seraphnet <dev@seraphnet.ai>"]
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.11"
-fastapi = "^0.73.0"
-prometheus-fastapi-instrumentator = "^5.7.1"
+python = ">=3.10,<3.11"
+fastapi = "^0.109.0"
 uvicorn = "^0.17.4"
 python-json-logger = "^2.0.1"
+python-dotenv = "^1.0.1"
+sqlalchemy = "^2.0.30"
+psycopg2-binary = "^2.9.9"
+selenium = "^4.21.0"
+alembic = "^1.13.1"
+qdrant-client = "^1.9.1"
+sentence_transformers = "^2.7.0"
+pandas = "^2.2.2"
 
 [tool.poetry.dev-dependencies]
 ipdb = "^0.13.9"
