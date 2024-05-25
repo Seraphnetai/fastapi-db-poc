@@ -1,4 +1,4 @@
-# clearpill-db-poc
+# FastAPI Template
 
 ## Running the Application
 ### Update database URL, API key and chromium paths
