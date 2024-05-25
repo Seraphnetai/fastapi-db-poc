@@ -1,133 +1,74 @@
-# aida360 - articles_tags
+# clearpill-db-poc
 
-## Stworzenie środowiska
-Aby zainstalować środowisko przez poetry należy uruchomić komendę
+## Running the Application
+### Update database URL, API key and chromium paths
+To run the application, first update `alembic.ini` with the correct database URL:
+    
+```ini
+sqlalchemy.url = postgresql://<username>:<password>@<host>:<port>/<database>
+```
+
+and do the same for `SQLALCHEMY_DATABASE_URL` in the `app/config.py` file:
+    
+```python 
+SQLALCHEMY_DATABASE_URL = "postgresql://<username>:<password>@<host>:<port>/<database>"
+```
+
+After that fill the environment variables in the `app/.env` file.
+Finally, follow the [instructions](https://cloudbytes.dev/snippets/run-selenium-and-chrome-on-wsl2)  to set up the chromium paths in `app/utils.py`:
+
+```python
+homedir = os.path.expanduser("~")
+chrome_options.binary_location = f"{homedir}/chrome-linux64/chrome"
+webdriver_service = Service(f"{homedir}/chromedriver-linux64/chromedriver")`
+```
+or use the default paths for the chrome and chromedriver binaries if you are not using WSL2.
+
+### Set up the environment
+In order to install the environment using Poetry, run the command:
+
 ```bash
 poetry install
 ```
 
-TODO konfiguracja jak tworzyć w katalogu projektu `.venv`
-Powinien utworzyć się folder `.venv`.
+TODO: Configuration for creating .venv in the project directory
+A .venv folder should be created.
 
-## Uruchomienie aplikacji
-### uvicorn
-Aby uruchomić aplikację z wykorzystaniem uvicorna najpierw nalezy wejść do poetry shella z poziomu głównego katalogu:
+### Running the Application
+Enter the Poetry shell from the main directory:
 
 ```bash
 poetry shell
 ```
-a następnie uruchomić komendę
+
+To apply migrations, run the following command in poetry shell:
+
+```bash
+alembic upgrade head
+```
+
+Then run the command:
 
 ```bash
 uvicorn app.api:app --reload --port 8000
 ```
 
-Numer portu można zmienić albo nie podawać go wcale, ponieważ domyślnie wynosi on 8000
+The port number can be changed or omitted, as it defaults to 8000.
 
-### Praca w czasie rzeczywistym, automatyczne odświeżanie aplikacji w kontenerze
+### Building the Container for local development
+In order to build the container for local development, first apply all changes mentioned in `Update database URL, API key and chromium paths` step and then update `docker-compose-build.yml` with the correct database credentials in the `environment` sections of the `clearpill_db_poc` and `db` services:
+    
+```yaml
+DATABASE_URL: postgresql://<username>:<password>@db:5432/<database
+POSTGRES_USER: <username>
+POSTGRES_PASSWORD: <password>
+POSTGRES_DB: <database>
+```
+
+Then run the following command:
 
 ```bash
-docker-compose up # obraz zostanie pobrany z rejestru
+./build-local-container.sh
 ```
 
-### Praca na kontenerze w trybie release
-
-@TODO
-```bash
-docker-compose -f docker-compose-release.yml up # korzysta ze wskazanej wersji release'a, odpowiedni do testowania docelowej aplikacji, już bez zależności developerskich
-```
-
-### Przebudowanie aktualnego kontenera o zmiany wprowadzone w Dockerfile
-
-```bash
-./build-local-container.sh # zostanie zbudowany lokalnie obraz i uruchomiony przez docker-compose
-```
-
-### Wyczyszczenie `całego` środowisko lokalnego w Dockerze
-
-**UWAGA! Czyści wszystkie kontenery, sieci, obrazy i cache z lokalnego środowiska. Nawet te spoza aplikacji.**
-
-```bash
-docker system prune
-```
-
-### Testy aplikacji uruchamiane lokalnie w kontenerze
-
-- Testy możemy uruchomić zarówno przez docker-compose odpowiednio nadpisując `command`, `entrypoint` lub łącząc się w trybie CLI pod działający kontener localdev i wywołując w konsoli odpowiednie komendy.
-- Dostępne komendy:
-  - `poetry run python -m pytest tests/` - testy jednostkowe
-  - `flake8 --ignore=E203 --benchmark app/` - testy zgodności ze standardem kodowania
-
-## Opis działania aplikacji
-
-<tutaj opis działania aplikacji>
-
-
-### Obsługa klienta
-
-#### Wymagane zmienne środowisko i konfiguracje dla klienta
-
-TBD
-
-## Aktualizacja infrastruktury GCP dla usługi
-
-### Praca z terraform w środowisku lokalnym
-
-- Konfigurację można testować poprzez `docker-compose-terraform.yml` odpowiednio wywołując komendy dla wskazanego obrazu i ustawionych lokalnie zmiennych środowiskowych.
-- **UWAGA! Zmienne wrażliwe nie powinny być commitowane do repozytorium. Zachowujemy je lokalnie (np. w pliku .env) i w konfiguracji CI/CD w sekcji variables na Gitlabie.**
-- **UWAGA! Nie uruchamiamy komendy `apply` w środowisku lokalnym dla projektów produkcyjnych.**
-
-#### Inicjalizacja stanu terraform
-
-```bash
-docker compose -f docker-compose-terraform.yml run --rm text_to_speech_terraform init
-```
-
-#### Formatowanie kodu zgodnie ze standardem dla plików .tf
-
-```bash
-docker compose -f docker-compose-terraform.yml run --rm text_to_speech_terraform fmt
-```
-
-#### Walidacja konfiguracji w poszukiwaniu błędów
-
-```bash
-docker compose -f docker-compose-terraform.yml run --rm text_to_speech_terraform validate
-```
-
-#### Sporządzenie planu i porównanie go ze stanem na zdalnym magazynie
-
-```bash
-docker compose -f docker-compose-terraform.yml run --rm text_to_speech_terraform plan
-```
-
----
-# ETL
-* opis projektu
-* jakie dane pobieramy
-* jaka jest częstotliwość pobierania danych
-
-## Przydatne linki
-
-1. Dokumentacja projektu na wiki
-2. Dokumentacja API
-
-## Struktura repozytorium
-```
-
-├── src                                   # Pliki źródłowe dla usług ETL wchodzących w skład projektu
-|   |
-|   ├── bigquery                          # Źródła usług Big Query
-|   ├── cloud_function                    # Źródła usług Cloud Functions
-|       |
-|       └── cf_nazwa_funkcji              # Katalog ze źródłami dla konkretnej funkcji
-|          ├── main.py                    # Kod funkcji
-|          └── requirements.txt           # Plik konfiguracyjny z wymaganymi bibliotekami
-|
-|
-├── terraform                             # Pliki konfiguracyjne projektu dla terraform
-|
-├── schematy                              # Pliki składające się na schematy architektury projektu
-|
-└── README.md                             # Dokumentacja repozytorium
-```
+The image will be built locally and started using docker-compose. It might take a while to build the image for the first time.
